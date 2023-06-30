@@ -1,0 +1,15 @@
+docker run --name mysql-gorm -p 3306:3306 -e MYSQL_ROOT_PASSWORD=notsosecretpassword -d mysql
+
+docker exec -it [container_name] bash
+
+mysql -uroot -p
+
+show databases;
+
+create database gorm;
+
+use gorm;
+
+show tables;
+
+SELECT * FROM users;
