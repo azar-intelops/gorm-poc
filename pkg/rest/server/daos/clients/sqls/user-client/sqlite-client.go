@@ -7,8 +7,8 @@ import (
 )
 
 func Migrate(r *sqls.SQLiteClient, m models.User) error {
-	db := r.DB.AutoMigrate(m)
-	return db.Error
+	err := r.DB.AutoMigrate(m)
+	return err
 }
 
 func Create(r *sqls.SQLiteClient, m models.User) (*models.User, error) {

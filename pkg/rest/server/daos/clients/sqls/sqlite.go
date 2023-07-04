@@ -4,10 +4,12 @@ import (
 	"os"
 	"sync"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var o sync.Once
+
 const FileName = "sqlite.db"
 
 type SQLiteClient struct {
@@ -23,7 +25,7 @@ func InitSqliteDB() (*SQLiteClient, error) {
 			err = os.Remove(FileName)
 		}
 		var db *gorm.DB
-		db, err = gorm.Open("sqlite3", FileName)
+		db, err = gorm.Open(sqlite.Open(FileName), &gorm.Config{})
 		sqliteClient = &SQLiteClient{
 			DB: db,
 		}
