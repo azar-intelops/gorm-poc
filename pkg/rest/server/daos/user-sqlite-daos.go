@@ -9,31 +9,28 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
 type UserDao struct {
-	sqlClient *sqls.SQLClient
+	db *gorm.DB
 }
 
 func NewUserDao() (*UserDao, error) {
 	sqlClient, err := sqls.InitSqlDB()
-	db = sqlClient.DB
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(models.User{})
+	err = sqlClient.DB.AutoMigrate(models.User{})
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserDao{
-		sqlClient: sqlClient,
+		db: sqlClient.DB,
 	}, nil
 }
 
 func (userDao *UserDao) CreateUser(user models.User) error {
-	if err := db.Create(&user).Error; err != nil {
+	if err := userDao.db.Create(&user).Error; err != nil {
 		return err
 	}
 
@@ -43,7 +40,7 @@ func (userDao *UserDao) CreateUser(user models.User) error {
 
 func (userDao *UserDao) ListUsers() ([]models.User, error) {
 	var all []models.User
-	if err := db.Find(&all).Error; err != nil {
+	if err := userDao.db.Find(&all).Error; err != nil {
 		return nil, err
 	}
 
@@ -57,11 +54,11 @@ func (userDao *UserDao) UpdateUser(id int64, user models.User) error {
 	}
 
 	var m models.User
-	if err := db.Where("id = ?", id).First(&m).Error; err != nil {
+	if err := userDao.db.Where("id = ?", id).First(&m).Error; err != nil {
 		return err
 	}
 	if id == m.Id {
-		db.Save(&user)
+		userDao.db.Save(&user)
 		log.Debugf("user updated")
 		return nil
 	}
@@ -71,7 +68,7 @@ func (userDao *UserDao) UpdateUser(id int64, user models.User) error {
 func (userDao *UserDao) DeleteUser(id int64) error {
 	var m models.User
 
-	if err := db.Where("id = ?", id).Delete(&m).Error; err != nil {
+	if err := userDao.db.Where("id = ?", id).Delete(&m).Error; err != nil {
 		return err
 	}
 
@@ -81,7 +78,7 @@ func (userDao *UserDao) DeleteUser(id int64) error {
 
 func (userDao *UserDao) GetUser(id int64) (models.User, error) {
 	var m models.User
-	if err := db.Where("id = ?", id).First(&m).Error; err != nil {
+	if err := userDao.db.Where("id = ?", id).First(&m).Error; err != nil {
 		return models.User{}, err
 	}
 	log.Debugf("user retrieved")
