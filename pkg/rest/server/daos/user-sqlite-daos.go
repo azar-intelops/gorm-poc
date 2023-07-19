@@ -29,13 +29,13 @@ func NewUserDao() (*UserDao, error) {
 	}, nil
 }
 
-func (userDao *UserDao) CreateUser(user models.User) error {
-	if err := userDao.db.Create(&user).Error; err != nil {
-		return err
+func (userDao *UserDao) CreateUser(user models.User) (*models.User, error) {
+	if result := userDao.db.Create(&user); result.Error != nil {
+		return nil, result.Error
 	}
 
 	log.Debugf("user created")
-	return nil
+	return &user, nil
 }
 
 func (userDao *UserDao) ListUsers() ([]models.User, error) {
@@ -48,21 +48,21 @@ func (userDao *UserDao) ListUsers() ([]models.User, error) {
 	return all, nil
 }
 
-func (userDao *UserDao) UpdateUser(id int64, user models.User) error {
+func (userDao *UserDao) UpdateUser(id int64, user models.User) (*models.User, error) {
 	if id != user.Id || id == 0 {
-		return errors.New("id and payload don't match or id can't be 0")
+		return nil, errors.New("id and payload don't match or id can't be 0")
 	}
 
 	var m models.User
 	if err := userDao.db.Where("id = ?", id).First(&m).Error; err != nil {
-		return err
+		return nil, err
 	}
 	if id == m.Id {
 		userDao.db.Save(&user)
 		log.Debugf("user updated")
-		return nil
+		return &user, nil
 	}
-	return errors.New("internal server error")
+	return nil, errors.New("internal server error")
 }
 
 func (userDao *UserDao) DeleteUser(id int64) error {
@@ -76,11 +76,11 @@ func (userDao *UserDao) DeleteUser(id int64) error {
 	return nil
 }
 
-func (userDao *UserDao) GetUser(id int64) (models.User, error) {
+func (userDao *UserDao) GetUser(id int64) (*models.User, error) {
 	var m models.User
 	if err := userDao.db.Where("id = ?", id).First(&m).Error; err != nil {
-		return models.User{}, err
+		return &models.User{}, err
 	}
 	log.Debugf("user retrieved")
-	return m, nil
+	return &m, nil
 }

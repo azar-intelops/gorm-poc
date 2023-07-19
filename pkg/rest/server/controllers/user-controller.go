@@ -12,7 +12,6 @@ import (
 
 type UserController struct {
 	userService *services.UserService
-
 }
 
 func NewUserController() (*UserController, error) {
@@ -35,7 +34,7 @@ func (userController *UserController) CreateUser(context *gin.Context) {
 	}
 
 	// trigger user creation
-	if err := userController.userService.CreateUser(input); err != nil {
+	if _, err := userController.userService.CreateUser(input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,7 +42,6 @@ func (userController *UserController) CreateUser(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{"message": "User created successfully"})
 }
-
 
 func (userController *UserController) UpdateUser(context *gin.Context) {
 	// validate input
@@ -62,7 +60,7 @@ func (userController *UserController) UpdateUser(context *gin.Context) {
 	}
 
 	// trigger user update
-	if err := userController.userService.UpdateUser(id, input); err != nil {
+	if _, err := userController.userService.UpdateUser(id, input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
